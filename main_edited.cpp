@@ -12,24 +12,18 @@ int safeMod(int val, int m) {
     return (val % m + m) % m;
 }
 
-// Kept the simple brute-force approach because it's easier to understand!
-int modInverse(int a, int m) {
-    a = a % m;
-    for (int x = 1; x < m; x++) {
-        if ((a * x) % m == 1) {
-            return x;
-        }
-    }
-    return -1;
-}
 
 int encryptFunction(int x, int a, int b) {
     return safeMod((a * x) + b, ALPHABET_SIZE);
 }
 
 int decryptFunction(int y, int a, int b) {
-    int a_inv = modInverse(a, ALPHABET_SIZE);
-    return safeMod(a_inv * (y - b), ALPHABET_SIZE);
+    for (int x = 0; x < ALPHABET_SIZE; x++) {
+        if (encryptFunction(x, a, b) == y) {
+            return x;
+        }
+    }
+    return -1; // Fallback, shouldn't be reached
 }
 
 // Extracted string encryption into its own function
