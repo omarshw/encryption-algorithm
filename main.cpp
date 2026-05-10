@@ -1,86 +1,124 @@
 #include <iostream>
 #include <string>
-#include <cctype>
 
 using namespace std;
 
-const int c = 26; 
+// Alphabet array
+char letters[26] = {
+    'A','B','C','D','E','F','G',
+    'H','I','J','K','L','M',
+    'N','O','P','Q','R','S',
+    'T','U','V','W','X','Y','Z'
+};
 
-int gcd(int a, int b) {
-    if (b == 0) return a;
-    return gcd(b, a % b);
-}
-
-int modInverse(int a, int m) {
-    for (int x = 1; x < m; x++) {
-        if (((a % m) * (x % m)) % m == 1) {
-            return x;
+// Get index of letter
+int getIndex(char ch) {
+    ch = toupper(ch);
+    for (int i = 0; i < 26; i++) {
+        if (letters[i] == ch) {
+            return i;
         }
     }
+
     return -1;
 }
 
-int encryptFunction(int x, int a, int b) {
-    return ((a * x) + b) % c;
+// Encrypt function
+string encrypt(string text, int a, int b) {
+    for (int i = 0; i < text.length(); i++) {
+        if (isalpha(text[i])) {
+            // Convert everything to uppercase
+            text[i] = toupper(text[i]);
+
+            // Get letter index
+            int x = getIndex(text[i]);
+            // Affine formula
+            int y = (a * x + b) % 26;
+            // Replace using array
+            text[i] = letters[y];
+        }
+    }
+
+    return text;
 }
 
-int decryptFunction(int y, int a, int b) {
-    int a_inv = modInverse(a, c);
-    int res = (a_inv * (y - b)) % c;
-    
-    if (res < 0) {
-        res += c;
+// Decrypt function
+string decrypt(string text, int a, int b) {
+    int aInverse = 1;
+
+    // Find inverse of a
+    for (int i = 0; i < 26; i++) {
+        if ((a * i) % 26 == 1) {
+            aInverse = i;
+        }
     }
-    return res;
+
+    for (int i = 0; i < text.length(); i++) {
+        if (isalpha(text[i])) {
+            // Convert everything to uppercase
+            text[i] = toupper(text[i]);
+
+            // Get encrypted letter index
+            int y = getIndex(text[i]);
+
+            // Decryption formula
+            int x = (aInverse * (y - b)) % 26;
+
+            // Fix negative values
+            if (x < 0) {
+                x += 26;
+            }
+
+            // Replace using array
+            text[i] = letters[x];
+        }
+    }
+
+    return text;
+}
+
+// Pointer function
+void showCharacters(char* ptr) {
+    while (*ptr != '\0') {
+        cout << *ptr << " ";
+        ptr++;
+    }
+
+    cout << endl;
 }
 
 int main() {
     int a, b;
     string text;
 
-    cout << "Enter values for 'a' and 'b': ";
-    if (!(cin >> a >> b)) {
-        cout << "Invalid input!" << endl;
-        return 1;
-    }
+    cout << "Enter keys a and b: ";
+    cin >> a >> b;
 
-    if (gcd(a, c) != 1) {
-        cout << "Error: The value 'a' (" << a << ") and 'c' (26) must be coprime!" << endl;
-        cout << "Cannot encrypt or decrypt. Please choose another 'a'." << endl;
+    // Invalid values for a
+    if (a % 2 == 0 || a % 13 == 0) {
+        cout << "Invalid value for a!" << endl;
         return 0;
     }
 
-    cout << "Enter text to encrypt: ";
     cin.ignore();
+
+    cout << "Enter text: ";
     getline(cin, text);
 
-    string encrypted = "";
-    for (char& ch : text) {
-        if (isalpha(ch)) {
-            bool isUpper = isupper(ch);
-            int x = tolower(ch) - 'a';
-            int encrypted_x = encryptFunction(x, a, b);
-            encrypted += (isUpper ? 'A' : 'a') + encrypted_x;
-        } else {
-            encrypted += ch;
-        }
-    }
+    // Encrypt
+    string encrypted = encrypt(text, a, b);
 
     cout << "\nEncrypted text: " << encrypted << endl;
 
-    string decrypted = "";
-    for (char& ch : encrypted) {
-        if (isalpha(ch)) {
-            bool isUpper = isupper(ch);
-            int y = tolower(ch) - 'a';
-            int decrypted_y = decryptFunction(y, a, b);
-            decrypted += (isUpper ? 'A' : 'a') + decrypted_y;
-        } else {
-            decrypted += ch;
-        }
-    }
+    // Pointer demo
+    cout << "\nCharacters using pointer:\n";
 
-    cout << "Decrypted text: " << decrypted << endl;
+    showCharacters(&encrypted[0]);
+
+    // Decrypt
+    string decrypted = decrypt(encrypted, a, b);
+
+    cout << "\nDecrypted text: " << decrypted << endl;
 
     return 0;
 }
