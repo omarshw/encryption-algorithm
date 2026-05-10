@@ -14,8 +14,9 @@ int safeMod(int val, int m) {
 
 // Kept the simple brute-force approach because it's easier to understand!
 int modInverse(int a, int m) {
+    a = a % m;
     for (int x = 1; x < m; x++) {
-        if (((a % m) * (x % m)) % m == 1) {
+        if ((a * x) % m == 1) {
             return x;
         }
     }
