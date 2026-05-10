@@ -1,89 +1,45 @@
 #include <iostream>
 #include <string>
-#include <cctype>
-#include <numeric> // Added for gcd
 
 using namespace std;
 
-const int ALPHABET_SIZE = 26; // Renamed for better readability
-
-// Safe modulo function to handle negative numbers in C++
-int safeMod(int val, int m) {
-    return (val % m + m) % m;
-}
-
-
-int encryptFunction(int x, int a, int b) {
-    return safeMod((a * x) + b, ALPHABET_SIZE);
-}
-
-int decryptFunction(int y, int a, int b) {
-    for (int x = 0; x < ALPHABET_SIZE; x++) {
-        if (encryptFunction(x, a, b) == y) {
-            return x;
+// Function that takes a pointer (char*) to modify the text directly
+void encrypt(char* ptr, int a, int b) {
+    // Keep going until the pointer hits the end of the string ('\0')
+    while (*ptr != '\0') {
+        if (*ptr >= 'A' && *ptr <= 'Z') {
+            *ptr = ((a * (*ptr - 'A') + b) % 26) + 'A'; // uppercase math
+        } 
+        else if (*ptr >= 'a' && *ptr <= 'z') {
+            *ptr = ((a * (*ptr - 'a') + b) % 26) + 'a'; // lowercase math
         }
+        ptr++; // Move pointer to the next character
     }
-    return -1; // Fallback, shouldn't be reached
-}
-
-// Extracted string encryption into its own function
-string encryptText(const string& text, int a, int b) {
-    string result = "";
-    for (char ch : text) {
-        if (isalpha(ch)) {
-            bool isUpper = isupper(ch);
-            int x = tolower(ch) - 'a';
-            int encrypted_x = encryptFunction(x, a, b);
-            result += (isUpper ? 'A' : 'a') + encrypted_x;
-        } else {
-            result += ch;
-        }
-    }
-    return result;
-}
-
-// Extracted string decryption into its own function
-string decryptText(const string& text, int a, int b) {
-    string result = "";
-    for (char ch : text) {
-        if (isalpha(ch)) {
-            bool isUpper = isupper(ch);
-            int y = tolower(ch) - 'a';
-            int decrypted_y = decryptFunction(y, a, b);
-            result += (isUpper ? 'A' : 'a') + decrypted_y;
-        } else {
-            result += ch;
-        }
-    }
-    return result;
 }
 
 int main() {
     int a, b;
     string text;
 
-    cout << "Enter values for 'a' and 'b': ";
-    if (!(cin >> a >> b)) {
-        cout << "Invalid input!" << endl;
-        return 1;
+    cout << "Enter keys 'a' and 'b': ";
+    cin >> a >> b;
+
+    // 'a' cannot share factors with 26 (cannot be even or a multiple of 13)
+    if (a % 2 == 0 || a % 13 == 0) {
+        cout << "Invalid 'a' key!\n";
+        return 0; 
     }
 
-    // Using the built-in gcd from <numeric>
-    if (gcd(a, ALPHABET_SIZE) != 1) {
-        cout << "Error: The value 'a' (" << a << ") and 'ALPHABET_SIZE' (26) must be coprime!" << endl;
-        cout << "Cannot encrypt or decrypt. Please choose another 'a'." << endl;
-        return 0;
-    }
-
-    cout << "Enter text to encrypt: ";
+    cout << "Enter text: ";
     cin.ignore();
     getline(cin, text);
 
-    string encrypted = encryptText(text, a, b);
-    cout << "\nEncrypted text: " << encrypted << endl;
+    // Call the function and pass the pointer to the start of the text string
+    if (!text.empty()) {
+        encrypt(&text[0], a, b);
+    }
 
-    string decrypted = decryptText(encrypted, a, b);
-    cout << "Decrypted text: " << decrypted << endl;
+    cout << "Encrypted: " << text << endl;
 
     return 0;
 }
