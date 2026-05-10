@@ -3,7 +3,7 @@
 
 using namespace std;
 
-// Alphabet array
+// ده الألفابيت اللي بنستخدمه في التشفير (A-Z)
 char letters[26] = {
     'A','B','C','D','E','F','G',
     'H','I','J','K','L','M',
@@ -11,114 +11,143 @@ char letters[26] = {
     'T','U','V','W','X','Y','Z'
 };
 
-// Get index of letter
+// دالة بتجيب رقم الحرف في الألفابيت (A = 0, B = 1 ... Z = 25)
+// لو الحرف مش موجود بترجع -1
+// Get index of letter (Aymoun & Morcos)
 int getIndex(char ch) {
-    ch = toupper(ch);
+    ch = toupper(ch); // نحول الحرف لكابيتال عشان نوحد التعامل
     for (int i = 0; i < 26; i++) {
         if (letters[i] == ch) {
-            return i;
+            return i; // لقينا مكان الحرف
         }
     }
-
-    return -1;
+    return -1; // مش موجود
 }
 
-// Encrypt function
+// دالة التشفير (Aymoun & Morcos)
+// هنا بنطبق معادلة Affine Cipher: (a*x + b) mod 26
+// الفكرة إننا بنمشي على النص باستخدام pointer ونعدل الحروف مباشرة في الذاكرة
 string encrypt(string text, int a, int b) {
-    for (int i = 0; i < text.length(); i++) {
-        if (isalpha(text[i])) {
-            // Convert everything to uppercase
-            text[i] = toupper(text[i]);
-
-            // Get letter index
-            int x = getIndex(text[i]);
-            // Affine formula
+    char* ptr = &text[0]; // pointer بيبدأ من أول حرف في النص
+    while (*ptr != '\0') {
+        // بنلف على النص حرف حرف لحد ما نوصل لنهاية string
+        
+        if (isalpha(*ptr)) {
+            // بنشتغل بس لو الحرف ده حرف (مش رقم أو مسافة)
+            
+            *ptr = toupper(*ptr);
+            // بنحوّل الحرف لكابيتال عشان التشفير يبقى موحد
+            
+            int x = getIndex(*ptr);
+            // بنجيب رقم الحرف في الألفابيت (A=0, B=1 ...)
+            
             int y = (a * x + b) % 26;
-            // Replace using array
-            text[i] = letters[y];
+            // دي معادلة التشفير الأساسية:
+            // بنضرب في a ونضيف b وبناخد mod 26 عشان نلف داخل 26 حرف
+
+            *ptr = letters[y];
+            // بنستبدل الحرف الأصلي بالحرف المشفر من array letters
         }
+
+        ptr++;
+        // بنحرك الـ pointer للحرف اللي بعده في النص
     }
 
     return text;
 }
 
-// Decrypt function
+// دالة فك التشفير (Omar & Adham & Hossam)
+// هنا بنعكس معادلة Affine Cipher باستخدام pointer بدل الـ indexing
+// الفكرة إننا بنمشي على النص في الذاكرة ونعدل الحروف مباشرة
 string decrypt(string text, int a, int b) {
     int aInverse = 1;
 
-    // Find inverse of a
+    // بندور على الـ modular inverse بتاع a
+    // يعني رقم لو ضربناه في a يدي 1 mod 26
     for (int i = 0; i < 26; i++) {
         if ((a * i) % 26 == 1) {
             aInverse = i;
         }
     }
 
-    for (int i = 0; i < text.length(); i++) {
-        if (isalpha(text[i])) {
-            // Convert everything to uppercase
-            text[i] = toupper(text[i]);
+    char* ptr = &text[0]; 
+    // pointer بيبدأ من أول حرف في النص
 
-            // Get encrypted letter index
-            int y = getIndex(text[i]);
+    while (*ptr != '\0') {
+        // بنمشي على النص حرف حرف لحد ما نوصل لنهاية string
 
-            // Decryption formula
+        if (isalpha(*ptr)) {
+
+            // بنحوّل الحرف لكابيتال عشان نبقى موحدين
+            *ptr = toupper(*ptr);
+
+            // بنجيب رقم الحرف المشفر
+            int y = getIndex(*ptr);
+
+            // معادلة فك التشفير:
+            // x = aInverse * (y - b) mod 26
             int x = (aInverse * (y - b)) % 26;
 
-            // Fix negative values
+            // لو الناتج طلع سالب بنعدله عشان يفضل داخل 0-25
             if (x < 0) {
                 x += 26;
             }
 
-            // Replace using array
-            text[i] = letters[x];
+            // بنرجّع الحرف الأصلي باستخدام الـ array
+            *ptr = letters[x];
         }
+
+        ptr++;
+        // بنحرك الـ pointer للحرف اللي بعده
     }
 
     return text;
 }
 
-// Pointer function
-void showCharacters(char* ptr) {
-    while (*ptr != '\0') {
-        cout << *ptr << " ";
-        ptr++;
-    }
-
-    cout << endl;
-}
-
 int main() {
-    int a, b;
+    int a, b, choice;
     string text;
 
     cout << "Enter keys a and b: ";
     cin >> a >> b;
 
-    // Invalid values for a
+    // شرط مهم: a لازم يكون مناسب في Affine Cipher
     if (a % 2 == 0 || a % 13 == 0) {
         cout << "Invalid value for a!" << endl;
         return 0;
     }
 
-    cin.ignore();
+    // اختيار المستخدم بين التشفير وفك التشفير
+    cout << "Choose mode:\n";
+    cout << "1. Encrypt\n";
+    cout << "2. Decrypt\n";
+    cout << "Enter choice: ";
+    cin >> choice;
+
+    cin.ignore(); // عشان نشيل enter
 
     cout << "Enter text: ";
     getline(cin, text);
 
-    // Encrypt
-    string encrypted = encrypt(text, a, b);
+    string result;
 
-    cout << "\nEncrypted text: " << encrypted << endl;
+    // تشغيل الوظيفة حسب اختيار المستخدم
+    if (choice == 1) {
+        result = encrypt(text, a, b);
+        cout << "\nEncrypted text: " << result << endl;
+    }
+    else if (choice == 2) {
+        result = decrypt(text, a, b);
+        cout << "\nDecrypted text: " << result << endl;
+    }
+    else {
+        cout << "Invalid choice!" << endl;
+        return 0;
+    }
 
-    // Pointer demo
+    // تجربة pointer: عرض الحروف واحدة واحدة
     cout << "\nCharacters using pointer:\n";
-
-    showCharacters(&encrypted[0]);
-
-    // Decrypt
-    string decrypted = decrypt(encrypted, a, b);
-
-    cout << "\nDecrypted text: " << decrypted << endl;
+    showCharacters(&result[0]);
 
     return 0;
 }
