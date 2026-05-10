@@ -13,7 +13,7 @@ char letters[26] = {
 
 // دالة بتجيب رقم الحرف في الألفابيت (A = 0, B = 1 ... Z = 25)
 // لو الحرف مش موجود بترجع -1
-// Get index of letter (Aymoun & Morcos)
+// Get index of letter (Omar)
 int getIndex(char ch) {
     ch = toupper(ch); // نحول الحرف لكابيتال عشان نوحد التعامل
     for (int i = 0; i < 26; i++) {
