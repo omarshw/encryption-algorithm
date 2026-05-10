@@ -145,9 +145,5 @@ int main() {
         return 0;
     }
 
-    // تجربة pointer: عرض الحروف واحدة واحدة
-    cout << "\nCharacters using pointer:\n";
-    showCharacters(&result[0]);
-
     return 0;
 }
