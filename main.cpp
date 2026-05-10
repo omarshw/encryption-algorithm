@@ -124,8 +124,6 @@ int main() {
     cout << "Enter choice: ";
     cin >> choice;
 
-    cin.ignore(); // عشان نشيل enter
-
     cout << "Enter text: ";
     getline(cin, text);
 
