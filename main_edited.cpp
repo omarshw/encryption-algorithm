@@ -17,6 +17,23 @@ void encrypt(char* ptr, int a, int b) {
     }
 }
 
+// Function to decrypt using a pointer (char*)
+void decrypt(char* ptr, int a, int b) {
+    while (*ptr != '\0') {
+        if (*ptr >= 'A' && *ptr <= 'Z') {
+            for (int i = 0; i < 26; i++) {
+                if ((a * i + b) % 26 == (*ptr - 'A')) { *ptr = i + 'A'; break; }
+            }
+        } 
+        else if (*ptr >= 'a' && *ptr <= 'z') {
+            for (int i = 0; i < 26; i++) {
+                if ((a * i + b) % 26 == (*ptr - 'a')) { *ptr = i + 'a'; break; }
+            }
+        }
+        ptr++; // Move pointer to the next character
+    }
+}
+
 int main() {
     int a, b;
     string text;
@@ -40,6 +57,13 @@ int main() {
     }
 
     cout << "Encrypted: " << text << endl;
+
+    // Now decrypt it back using the pointer
+    if (!text.empty()) {
+        decrypt(&text[0], a, b);
+    }
+
+    cout << "Decrypted: " << text << endl;
 
     return 0;
 }
